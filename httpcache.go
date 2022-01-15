@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -42,13 +41,19 @@ type Cache interface {
 // cacheKey returns the cache key for req.
 func cacheKey(req *http.Request) string {
 
-	fmt.Println("--------Cache Key ---------")
 	tenant := req.Header.Get("X-Tenant")
-	if req.Method == http.MethodGet {
-		return tenant + "-" + req.URL.String()
-	} else {
-		return tenant + "-" + req.Method + " " + req.URL.String()
+
+	var key = ""
+
+	if len(tenant) > 0 {
+		key = tenant + "-"
 	}
+	if req.Method == http.MethodGet {
+		key = key + req.URL.String()
+	} else {
+		key = key + req.Method + " " + req.URL.String()
+	}
+	return key
 }
 
 // CachedResponse returns the cached http.Response for req if present, and nil

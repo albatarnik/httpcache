@@ -148,6 +148,22 @@ func setup() {
 		time.Sleep(3 * time.Second)
 	}))
 
+	// Take 3 seconds to return 200 OK (for testing client timeouts).
+	mux.HandleFunc("/tenants", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tenant := r.Header.Get("X-Tenant")
+		if tenant == "tenant1" {
+			w.Write([]byte("Tenant1"))
+			return
+		}
+		if tenant == "tenant2" {
+			w.Write([]byte("Tenant2"))
+			return
+		}
+
+		w.Write([]byte("Tenant4"))
+		return
+	}))
+
 	mux.HandleFunc("/infinite", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		for {
 			select {
@@ -253,6 +269,61 @@ func TestDontServeHeadResponseToGetRequest(t *testing.T) {
 	}
 }
 
+func TestMultiTenantCaching(t *testing.T) {
+	resetTest()
+	{
+		req, err := http.NewRequest("GET", s.server.URL+"/tenants", nil)
+		req.Header.Set("X-Tenant", "tenant1")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, err := s.client.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var buf bytes.Buffer
+		_, err = io.Copy(&buf, resp.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = resp.Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got, want := buf.String(), "Tenant1"; got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+
+		/* */
+		req2, err := http.NewRequest("GET", s.server.URL+"/tenants", nil)
+		req2.Header.Set("X-Tenant", "tenant2")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp2, err := s.client.Do(req2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var buf2 bytes.Buffer
+		_, err = io.Copy(&buf2, resp2.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = resp2.Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got, want := buf2.String(), "Tenant2"; got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+
+	}
+}
+
 func TestDontStorePartialRangeInCache(t *testing.T) {
 	resetTest()
 	{
@@ -274,6 +345,7 @@ func TestDontStorePartialRangeInCache(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		if got, want := buf.String(), " text "; got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}

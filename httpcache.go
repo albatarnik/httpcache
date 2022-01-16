@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -43,6 +44,8 @@ func cacheKey(req *http.Request) string {
 
 	tenant := req.Header.Get("X-Tenant")
 
+	fmt.Printf("\n--cache key-- \n")
+
 	var key = ""
 
 	if len(tenant) > 0 {
@@ -53,6 +56,9 @@ func cacheKey(req *http.Request) string {
 	} else {
 		key = key + req.Method + " " + req.URL.String()
 	}
+
+	fmt.Println(key)
+
 	return key
 }
 

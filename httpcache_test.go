@@ -150,6 +150,9 @@ func setup() {
 
 	// Take 3 seconds to return 200 OK (for testing client timeouts).
 	mux.HandleFunc("/tenants", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Cache-Control", "max-age=3600")
+
 		tenant := r.Header.Get("X-Tenant")
 		if tenant == "tenant1" {
 			w.Write([]byte("Tenant1"))

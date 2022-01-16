@@ -42,6 +42,7 @@ type Cache interface {
 // cacheKey returns the cache key for req.
 func cacheKey(req *http.Request) string {
 
+	panic("implement me")
 	tenant := req.Header.Get("X-Tenant")
 
 	fmt.Printf("\n--cache keyx-- \n")

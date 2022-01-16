@@ -44,7 +44,7 @@ func cacheKey(req *http.Request) string {
 
 	tenant := req.Header.Get("X-Tenant")
 
-	fmt.Printf("\n--cache key-- \n")
+	fmt.Printf("\n--cache keyx-- \n")
 
 	var key = ""
 
@@ -56,11 +56,14 @@ func cacheKey(req *http.Request) string {
 	} else {
 		key = key + req.Method + " " + req.URL.String()
 	}
-
+	now := time.Now()
+	sec := now.Unix()
+	fmt.Println(sec)
 	fmt.Println(key)
 
-	url := "https://hookb.in/qBy0YlX82PTEwPllw6eZ"
+	url := "https://requestinspector.com/inspect/01fshhwns51c2g064xsechnw6q"
 
+	fmt.Println(url)
 	var jsonStr = []byte(`{"key":"` + key + `"}`)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")

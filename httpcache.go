@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -42,10 +41,8 @@ type Cache interface {
 // cacheKey returns the cache key for req.
 func cacheKey(req *http.Request) string {
 
-	// panic("implement me")
+	//TODO:: make the header key configurable
 	tenant := req.Header.Get("X-Tenant")
-
-	fmt.Printf("\n--cache keyx-- \n")
 
 	var key = ""
 
@@ -57,24 +54,6 @@ func cacheKey(req *http.Request) string {
 	} else {
 		key = key + req.Method + " " + req.URL.String()
 	}
-	now := time.Now()
-	sec := now.Unix()
-	fmt.Println(sec)
-	fmt.Println(key)
-
-	url := "https://requestinspector.com/inspect/01fshhwns51c2g064xsechnw6q"
-
-	fmt.Println(url)
-	var jsonStr = []byte(`{"key":"` + key + `"}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
 
 	return key
 }
